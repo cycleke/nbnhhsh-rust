@@ -4,6 +4,31 @@ use std::env;
 const HELP_OPT: [&str; 4] = ["-h", "--h", "-help", "--help"];
 const API_URL: &str = "https://lab.magiconch.com/api/nbnhhsh/guess";
 
+fn main() -> Result<(), ureq::Error> {
+    let args: Vec<String> = env::args().collect();
+
+    if args.len() == 1 || find_help(&args) {
+        help(&args[0]);
+        return Ok(());
+    }
+
+    guess(&args[1..])
+}
+
+fn find_help(args: &[String]) -> bool {
+    args[1..]
+        .iter()
+        .any(|token| HELP_OPT.contains(&(&token.to_lowercase() as &str)))
+}
+
+fn help(exec: &str) {
+    println!(
+        "usage: {} sx
+\tsx：拼音首字母缩写，支持多个缩写",
+        exec
+    );
+}
+
 #[derive(Deserialize)]
 struct Guess {
     name: String,
@@ -11,10 +36,16 @@ struct Guess {
     inputting: Option<Vec<String>>,
 }
 
-fn guess(words: &str) -> Result<(), ureq::Error> {
+fn guess(words: &[String]) -> Result<(), ureq::Error> {
+    let words: Vec<_> = words
+        .iter()
+        .flat_map(|word| word.split(|chr: char| !chr.is_ascii_alphanumeric()))
+        .filter(|word| !word.is_empty())
+        .collect();
+
     let guess: Vec<Guess> = ureq::post(API_URL)
         .send_json(ureq::json!({
-          "text": words,
+          "text": &words[..].join(" "),
         }))?
         .into_json()?;
 
@@ -48,27 +79,4 @@ fn guess(words: &str) -> Result<(), ureq::Error> {
     }
 
     Ok(())
-}
-
-fn help(exec: &str) {
-    println!(
-        "usage: {} sx
-\tsx：拼音首字母缩写，支持多个缩写",
-        exec
-    );
-}
-
-fn main() -> Result<(), ureq::Error> {
-    let args: Vec<String> = env::args().collect();
-
-    if args.len() == 1
-        || args[1..]
-            .iter()
-            .any(|token| HELP_OPT.contains(&(&token.to_lowercase() as &str)))
-    {
-        help(&args[0]);
-        return Ok(());
-    }
-
-    guess(&args[1..].join(","))
 }

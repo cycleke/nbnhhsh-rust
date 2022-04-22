@@ -1,5 +1,4 @@
 * 「能不能好好说话？」 拼音首字母缩写翻译工具的 rust 版本
 
-
 基于 [[https://github.com/itorr][@itorr]] 的 [[https://github.com/itorr/nbnhhsh][能不能好好说话？]] 工具制作的一个 rust 脚本,
 可以用于很方便地查询拼音首字母缩写。

@@ -7,8 +7,6 @@ edition = "2021"
 
 [profile.release]
 lto = true
-opt-level = 'z'
-codegen-units = 1
 
 [dependencies]
 ureq = { version = "2.4.0", features = ["json"] }
